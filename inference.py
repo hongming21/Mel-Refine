@@ -104,7 +104,7 @@ def main():
     exp_id = str(int(time.time()))
     if not os.path.exists(logdir):
         os.makedirs(logdir)
-    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_schmode_{schedule_mode}"
+    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_{schedule_mode}"
     os.makedirs(output_dir, exist_ok=True)
     
     # Generate #
