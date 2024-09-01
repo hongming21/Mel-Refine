@@ -57,6 +57,10 @@ def parse_args():
         help="param adjust mode"
     )
     parser.add_argument(
+        "--seed", type=int, default=42,
+        help="seed everything",
+    )
+    parser.add_argument(
         "--s1", type=float, default=1.0,
         help="s1",
     )
@@ -76,18 +80,29 @@ def parse_args():
     args = parser.parse_args()
 
     return args
+def seed_everything(seed):
+    import random, os
+    import numpy as np
+    import torch
 
-
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
 def main():
-    torch.backends.cuda.matmul.allow_tf32 = True
-    torch.backends.cudnn.allow_tf32 = True
-    torch.set_float32_matmul_precision('high')
+    
     args = parse_args()
     num_steps, guidance, batch_size = args.num_steps, args.guidance, args.batch_size
     checkpoint = args.checkpoint
     logdir = args.logdir
+    seed=args.seed
+    seed_everything(seed)
     bs_param = (args.s1, args.s2, args.b1, args.b2)
     schedule_mode = args.adjust_mode
+    model_name=checkpoint.split('/')[-1]
     # Load Models #
     tango = Tango(checkpoint, args.device)
     vae, stft, model = tango.vae, tango.stft, tango.model
@@ -104,7 +119,7 @@ def main():
     exp_id = str(int(time.time()))
     if not os.path.exists(logdir):
         os.makedirs(logdir)
-    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_{schedule_mode}"
+    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_{schedule_mode}_{model_name}_seed{seed}"
     os.makedirs(output_dir, exist_ok=True)
     
     # Generate #

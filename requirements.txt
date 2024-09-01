@@ -1,6 +1,6 @@
 torch==2.1.0
-torchaudio==0.13.1
-torchvision==0.14.1
+torchaudio==2.1.0
+torchvision==0.16.0
 transformers==4.27.0
 accelerate==0.18.0
 datasets==2.1.0

@@ -320,40 +320,47 @@ class AudioDiffusion(nn.Module):
         else:
             self.sch_mode=mode
             self.bs_param=bs
-    def compute_bs(self,timesteps,t_total):
-        if self.sch_mode=="none":
+    def compute_bs(self, timesteps, t_total):
+        if self.sch_mode == "none":
             return None
         else:
-            s1, s2, b1, b2 =self.bs_param
+            s1, s2, b1, b2 = self.bs_param
             timesteps = timesteps.float() / t_total
+
             if self.sch_mode == "constant":
-                # 参数随时间步长 t 不变
                 s1 = torch.full_like(timesteps, s1)
                 s2 = torch.full_like(timesteps, s2)
                 b1 = torch.full_like(timesteps, b1)
                 b2 = torch.full_like(timesteps, b2)
             
             elif self.sch_mode == "linear":
-                # 参数随时间步长 t 线性变化到 (1.0, 1.0, 1.0, 1.0)
                 s1 = 1.0 + (s1-1.0) * timesteps
                 s2 = 1.0 + (s2-1.0) * timesteps
                 b1 = 1.0 + (b1-1.0) * timesteps
                 b2 = 1.0 + (b2-1.0) * timesteps
 
             elif self.sch_mode == "cosine":
-                # 参数随余弦函数变化并最终达到 (1.0, 1.0, 1.0, 1.0)
                 s1 = 1.0 + (s1-1.0) * (0.5 * (1 - torch.cos(math.pi * timesteps)))
                 s2 = 1.0 + (s2-1.0) * (0.5 * (1 - torch.cos(math.pi * timesteps)))
                 b1 = 1.0 + (b1-1.0) * (0.5 * (1 - torch.cos(math.pi * timesteps)))
                 b2 = 1.0 + (b2-1.0) * (0.5 * (1 - torch.cos(math.pi * timesteps)))
 
             elif self.sch_mode == "exp":
-                # 参数随指数函数变化并最终达到 s1, s2, b1, b2
                 s1 = 1.0 * torch.exp(-2*timesteps) + s1 * (1 - torch.exp(-2*timesteps))
                 s2 = 1.0 * torch.exp(-2*timesteps) + s2 * (1 - torch.exp(-2*timesteps))
                 b1 = 1.0 * torch.exp(-2*timesteps) + b1 * (1 - torch.exp(-2*timesteps))
                 b2 = 1.0 * torch.exp(-2*timesteps) + b2 * (1 - torch.exp(-2*timesteps))
             
+            elif self.sch_mode == "sigmoid":
+                # 不进行平移，并使中间部分陡峭
+                k = 12  # 增加 k 值使中间部分陡峭，调整 k 以控制陡峭度
+                sigmoid = lambda t: 1 / (1 + torch.exp(-k * (t - 0.5)))
+                s1 = 1.0 + (s1 - 1.0) * sigmoid(timesteps)
+                s2 = 1.0 + (s2 - 1.0) * sigmoid(timesteps)
+                b1 = 1.0 + (b1 - 1.0) * sigmoid(timesteps)
+                b2 = 1.0 + (b2 - 1.0) * sigmoid(timesteps)
+            
             else:
                 raise ValueError(f"Unknown mode {self.sch_mode}")
-        return s1,s2,b1,b2
+            
+            return s1, s2, b1, b2

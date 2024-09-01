@@ -163,3 +163,4 @@ cython_debug/
 
 ckpt/
 newlog/
+test_mode/
