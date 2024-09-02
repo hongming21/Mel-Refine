@@ -353,7 +353,7 @@ class AudioDiffusion(nn.Module):
             
             elif self.sch_mode == "sigmoid":
                 # 不进行平移，并使中间部分陡峭
-                k = 12  # 增加 k 值使中间部分陡峭，调整 k 以控制陡峭度
+                k = 14  # 增加 k 值使中间部分陡峭，调整 k 以控制陡峭度
                 sigmoid = lambda t: 1 / (1 + torch.exp(-k * (t - 0.5)))
                 s1 = 1.0 + (s1 - 1.0) * sigmoid(timesteps)
                 s2 = 1.0 + (s2 - 1.0) * sigmoid(timesteps)
