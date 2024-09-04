@@ -165,3 +165,8 @@ ckpt/
 newlog/
 test_mode/
 log/
+
+none/
+log/
+high_freq/
+low_freq/
