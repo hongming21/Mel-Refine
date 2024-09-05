@@ -2516,6 +2516,7 @@ class CrossAttnUpBlock2D(nn.Module):
                     s2=self.s2,
                     b1=self.b1,
                     b2=self.b2,
+                    m=self.m
                 )
 
             hidden_states = torch.cat([hidden_states, res_hidden_states], dim=1)
@@ -2649,6 +2650,7 @@ class UpBlock2D(nn.Module):
                     s2=self.s2,
                     b1=self.b1,
                     b2=self.b2,
+                    m=self.m
                 )
 
             hidden_states = torch.cat([hidden_states, res_hidden_states], dim=1)

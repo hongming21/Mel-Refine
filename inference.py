@@ -76,6 +76,10 @@ def parse_args():
         "--b2", type=float, default=1.0,
         help="b2",
     )
+    parser.add_argument(
+        "--m", type=float, default=1.0,
+        help="m",
+    )
 
     args = parser.parse_args()
 
@@ -101,6 +105,7 @@ def main():
     seed = args.seed
     seed_everything(seed)
     bs_param = (args.s1, args.s2, args.b1, args.b2)
+    m=args.m
     schedule_mode = args.adjust_mode
     model_name = checkpoint.split('/')[-1]
 
@@ -121,13 +126,14 @@ def main():
     exp_id = str(int(time.time()))
     if not os.path.exists(logdir):
         os.makedirs(logdir)
-    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_{schedule_mode}_{model_name}_seed{seed}"
+    output_dir = f"{logdir}/{exp_id}_steps_{num_steps}_guidance_{guidance}_s1_{args.s1}_s2_{args.s2}_b1_{args.b1}_b2_{args.b2}_m_{m}_{schedule_mode}_{model_name}_seed{seed}"
     os.makedirs(output_dir, exist_ok=True)
     
     # Generate and Save #
-    model.set_bs(schedule_mode, bs_param)
+    model.set_bs(schedule_mode, bs_param,m)
     print(model.sch_mode)
-    
+    print(bs_param)
+    print(m)
     for k in tqdm(range(0, len(text_prompts), batch_size)):
         batch_text = text_prompts[k: k + batch_size]
         batch_filenames = [f"{output_dir}/{filenames[i]}.wav" for i in range(k, min(k + batch_size, len(filenames)))]

@@ -244,7 +244,8 @@ class AudioDiffusion(nn.Module):
                 ).sample
             else:
                 s1,s2,b1,b2=self.compute_bs(timesteps=t,t_total=num_steps)
-                self.unet.enable_freeu(s1, s2, b1, b2)
+                m=self.m
+                self.unet.enable_freeu(s1, s2, b1, b2,m)
                 noise_pred = self.unet(
                     latent_model_input, t, encoder_hidden_states=prompt_embeds,
                     encoder_attention_mask=boolean_prompt_mask
@@ -314,12 +315,13 @@ class AudioDiffusion(nn.Module):
 
         return prompt_embeds, boolean_prompt_mask
     
-    def set_bs(self,mode='none',bs=None):
+    def set_bs(self,mode='none',bs=None,m=1.0):
         if mode=='none':
             self.sch_mode='none'
         else:
             self.sch_mode=mode
             self.bs_param=bs
+            self.m=m
     def compute_bs(self, timesteps, t_total):
         if self.sch_mode == "none":
             return None
@@ -353,7 +355,7 @@ class AudioDiffusion(nn.Module):
             
             elif self.sch_mode == "sigmoid":
                 # 不进行平移，并使中间部分陡峭
-                k = 14  # 增加 k 值使中间部分陡峭，调整 k 以控制陡峭度
+                k = 12  # 增加 k 值使中间部分陡峭，调整 k 以控制陡峭度
                 sigmoid = lambda t: 1 / (1 + torch.exp(-k * (t - 0.5)))
                 s1 = 1.0 + (s1 - 1.0) * sigmoid(timesteps)
                 s2 = 1.0 + (s2 - 1.0) * sigmoid(timesteps)

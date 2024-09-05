@@ -162,7 +162,7 @@ def apply_freeu(
         hidden_max, _ = torch.max(hidden_mean.view(B, -1), dim=-1, keepdim=True) 
         hidden_min, _ = torch.min(hidden_mean.view(B, -1), dim=-1, keepdim=True)
         hidden_mean = (hidden_mean - hidden_min.unsqueeze(2).unsqueeze(3)) / (hidden_max - hidden_min).unsqueeze(2).unsqueeze(3)
-        hidden_states = hidden_states * ((1.0) * hidden_mean + 1)
+        hidden_states = hidden_states * ((freeu_kwargs["m"]-1) * hidden_mean + 1)
         hidden_states=fourier_filter(hidden_states,threshold="high",scale=freeu_kwargs["b1"])
         res_hidden_states = fourier_filter(res_hidden_states, threshold="high", scale=freeu_kwargs["s1"])
     if resolution_idx == 1:
@@ -171,7 +171,7 @@ def apply_freeu(
         hidden_max, _ = torch.max(hidden_mean.view(B, -1), dim=-1, keepdim=True) 
         hidden_min, _ = torch.min(hidden_mean.view(B, -1), dim=-1, keepdim=True)
         hidden_mean = (hidden_mean - hidden_min.unsqueeze(2).unsqueeze(3)) / (hidden_max - hidden_min).unsqueeze(2).unsqueeze(3)
-        hidden_states = hidden_states * ((1.0) * hidden_mean + 1)
+        hidden_states = hidden_states * ((freeu_kwargs["m"]-1) * hidden_mean + 1)
         hidden_states=fourier_filter(hidden_states,threshold="high",scale=freeu_kwargs["b2"])
         res_hidden_states = fourier_filter(res_hidden_states, threshold="high", scale=freeu_kwargs["s2"])
 
